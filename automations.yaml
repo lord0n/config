@@ -1,0 +1,348 @@
+- id: '1652222543220'
+  alias: Управление с кубика
+  description: 'Сдвинуть - подсветка прихожей
+
+    90 - свет прихожая
+
+    180 - выкл ванна и туалет
+
+    Встряхнуть - кухня'
+  use_blueprint:
+    path: a12maa_cube/z2m-xiaomi-cube-controller_8-actions.yaml
+    input:
+      remote: sensor.kubik_action
+      slide:
+      - type: toggle
+        device_id: b90b42509d478a173e4b45762f906060
+        entity_id: switch.prikhozhaia_podsvetka_l1
+        domain: switch
+      tap: []
+      flip90:
+      - type: toggle
+        device_id: 3534b1901708b906103745d7e5ff75a5
+        entity_id: switch.svet_prikhozhaia
+        domain: switch
+      flip180:
+      - type: turn_off
+        device_id: 86c74acc3794f179919d7d784bb4e358
+        entity_id: switch.svet_vanna_tualet_left
+        domain: switch
+      - type: turn_off
+        device_id: 86c74acc3794f179919d7d784bb4e358
+        entity_id: switch.svet_vanna_tualet_right
+        domain: switch
+      shake:
+      - type: toggle
+        device_id: b937421e94976930ccd23a0739978efd
+        entity_id: switch.svet_kukhnia
+        domain: switch
+      fall:
+      - type: toggle
+        device_id: ab14d852f52963cc0fb3b98b79a91484
+        entity_id: light.svet_spalnia_right
+        domain: light
+- id: '1652266322188'
+  alias: Автоматизация туалета
+  description: ''
+  use_blueprint:
+    path: home-assistant/motion_light.yaml
+    input:
+      motion_entity: binary_sensor.dvizhenie_tualet_occupancy
+      light_target:
+        entity_id:
+        - light.svet_vanna_tualet_left
+- id: '1652266583795'
+  alias: OFF Свет коридора
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - switch.svet_koridor
+    to: 'on'
+  condition: []
+  action:
+  - delay:
+      hours: 0
+      minutes: 10
+      seconds: 0
+      milliseconds: 0
+  - type: turn_off
+    device_id: dca8720db79c02763b109137ba77e14a
+    entity_id: light.svet_koridor
+    domain: light
+  mode: single
+- id: '1652266817875'
+  alias: ON Подсветка прихожей
+  description: ''
+  trigger:
+  - platform: sun
+    event: sunset
+    offset: '+10'
+  condition: []
+  action:
+  - type: turn_on
+    device_id: b90b42509d478a173e4b45762f906060
+    entity_id: light.prikhozhaia_podsvetka_l1
+    domain: light
+  mode: single
+- id: '1652266945839'
+  alias: OFF Подсветка прихожей
+  description: ''
+  trigger:
+  - platform: time
+    at: 00:00:00
+  condition: []
+  action:
+  - type: turn_off
+    device_id: b90b42509d478a173e4b45762f906060
+    entity_id: light.prikhozhaia_podsvetka_l1
+    domain: light
+  mode: single
+- id: '1652267235271'
+  alias: ON Ночник детям
+  description: ''
+  trigger:
+  - platform: sun
+    event: sunset
+    offset: '+10'
+  condition: []
+  action:
+  - type: turn_on
+    device_id: f8ab58aea3f704ac229cbd4fe287bbf8
+    entity_id: light.nochnik_detskaia_l2
+    domain: light
+  mode: single
+- id: '1652267519439'
+  alias: OFF Ночник детская по восходу
+  description: ''
+  trigger:
+  - platform: sun
+    event: sunrise
+    offset: '+10'
+  condition: []
+  action:
+  - type: turn_off
+    device_id: f8ab58aea3f704ac229cbd4fe287bbf8
+    entity_id: light.nochnik_detskaia_l2
+    domain: light
+  mode: single
+- id: '1652273430626'
+  alias: Отключить на ночь автоматизацию ванны и туалета
+  description: ''
+  trigger:
+  - platform: time
+    at: 00:00:00
+  condition: []
+  action:
+  - service: automation.turn_off
+    data:
+      stop_actions: true
+    target:
+      entity_id:
+      - automation.avtomatizatsiia_tualeta
+      - automation.vkliuchenie_sveta_po_sensoru
+  mode: single
+- id: '1652277473061'
+  alias: OFF Свет прихожей
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - light.svet_prikhozhaia
+    to: 'on'
+  condition: []
+  action:
+  - delay:
+      hours: 0
+      minutes: 10
+      seconds: 0
+      milliseconds: 0
+  - type: turn_off
+    device_id: 3534b1901708b906103745d7e5ff75a5
+    entity_id: light.svet_prikhozhaia
+    domain: light
+  mode: single
+- id: '1652290278425'
+  alias: Все ушли. Отключить все
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - sensor.all_in_home
+    to: 'False'
+    for:
+      hours: 0
+      minutes: 1
+      seconds: 0
+  condition: []
+  action:
+  - service: script.1652523701871
+    data: {}
+  mode: single
+- id: '1652336719037'
+  alias: Включить ванну и туалет в 8 утра
+  description: ''
+  trigger:
+  - platform: time
+    at: 08:00:00
+  condition: []
+  action:
+  - service: automation.turn_on
+    data: {}
+    target:
+      entity_id:
+      - automation.avtomatizatsiia_tualeta
+      - automation.vkliuchenie_sveta_po_sensoru
+  mode: single
+- id: '1652478140876'
+  alias: Сообщение о запуске сервера
+  description: ''
+  trigger:
+  - platform: homeassistant
+    event: start
+  condition: []
+  action:
+  - service: notify.tele
+    data:
+      message: 🏭Сервер перезапустился
+  mode: single
+- id: '1652524098712'
+  alias: Кто-то дома. Запуск автоматизаций
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - sensor.all_in_home
+    to: 'True'
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 0
+  condition: []
+  action:
+  - service: script.1652523785333
+    data: {}
+  mode: single
+- id: '1652526599226'
+  alias: Низкий уровень заряда батареи у датчиков
+  description: ''
+  use_blueprint:
+    path: sbyx/low-battery-level-detection-notification-for-all-battery-sensors.yaml
+    input:
+      exclude:
+        entity_id:
+        - sensor.dvizhenie_vannaia_battery
+        - sensor.dvizhenie_tualet_battery
+        - sensor.kubik_battery
+        - sensor.temperatura_vanna_battery
+        - sensor.temperatura_zal_battery
+      actions:
+      - service: notify.tele
+        data:
+          message: У одного из датчиков садится батарейка
+- id: '1652565112937'
+  alias: Сводка новостей
+  description: ''
+  trigger:
+  - platform: time
+    at: 06:30:00
+  condition: []
+  action:
+  - service: script.1652525192671
+    data: {}
+  mode: single
+- id: '1652654891176'
+  alias: 'Автоматика ванной: движение и влажность'
+  description: Если одно из условий (движение или влажность > 60) выполняется, то
+    не выключает свет. Иначе ждет 5 минут и выключает свет
+  use_blueprint:
+    path: home-assistant/sensor_light.yaml
+    input:
+      motion_entity: sensor.vanna_motion_humidity60
+      light_target:
+        entity_id: light.svet_vanna_tualet_right
+      no_motion_wait: 300
+- id: '1652706035929'
+  alias: Тонера меньше 40%
+  description: ''
+  trigger:
+  - platform: numeric_state
+    entity_id: sensor.dcp_1610w_black_toner_remaining
+    below: '40'
+  condition: []
+  action:
+  - service: notify.tele
+    data:
+      message: 🖨️Заканчивается тонер в принтере brother 1612w (< 40%). Необходимо
+        купить картридж TN-1075T
+  mode: single
+- id: '1653002213304'
+  alias: Оповещение о недоступности устройств
+  description: ''
+  use_blueprint:
+    path: gmlupatelli/unavailable_entities_notification.yaml
+    input:
+      exclude:
+        entity_id:
+        - light.svet_vanna_tualet_right
+        - light.svet_vanna_tualet_left
+        - light.svet_kukhnia
+        - light.svet_koridor
+        - light.nochnik_detskaia_l1
+        - light.nochnik_detskaia_l2
+        - light.svet_detskaia_left
+        - light.svet_detskaia_right
+        - light.ves_svet
+        - light.prikhozhaia_podsvetka_l1
+        - light.svet_prikhozhaia
+        - light.svet_spalnia_left
+        - light.svet_spalnia_right
+        - binary_sensor.zigbee2mqtt_update_available
+        - binary_sensor.zigbee2mqtt_running
+        - sensor.zigbee2mqtt_version
+        - sensor.zigbee2mqtt_newest_version
+        - sensor.zigbee2mqtt_cpu_percent
+        - sensor.zigbee2mqtt_memory_percent
+        - sensor.svet_spalnia_action
+        - sensor.svet_spalnia_click
+        - switch.svet_spalnia_left
+        - switch.svet_spalnia_right
+        - sensor.kubik_action_angle
+        - sensor.kubik_action_from_side
+        - sensor.kubik_action_side
+        - sensor.kubik_action_to_side
+        - sensor.kubik_action
+        - sensor.prikhozhaia_podsvetka_energy
+        - sensor.prikhozhaia_podsvetka_temperature
+        - switch.prikhozhaia_podsvetka_l1
+        - switch.prikhozhaia_podsvetka_l2
+        - sensor.prikhozhaia_podsvetka_power_outage_count
+        - switch.prikhozhaia_podsvetka_interlock
+        - alarm_control_panel.54ef442c89cc_alarm
+        - select.54ef442c89cc_command
+        - select.54ef442c89cc_data
+        - sensor.nochnik_detskaia_energy
+        - sensor.nochnik_detskaia_temperature
+        - switch.nochnik_detskaia_l1
+        - switch.nochnik_detskaia_l2
+        - sensor.nochnik_detskaia_power_outage_count
+        - switch.nochnik_detskaia_interlock
+        - switch.svet_zal_left
+        - switch.svet_zal_right
+        - light.svet_zal_right
+        - light.svet_zal_left
+        device_id:
+        - f3a4373a0abaa7611980ef7a490ea038
+        - 3befcdccbb9838585d00b63ea583ef33
+        - 7c61e5f686f0cc4c1fc8c738667e9757
+        - b4cdce361756454ec002f1fa2baf17aa
+        - ce6dd41b5d6d4efc70f73de31f94275a
+        - d93847e70933583fcc59e90b0d641851
+        - 823ee7be94e0755815e532e16f52f5d1
+        - e81bbbb6e72beb71d87c577644bdd2cc
+        - cfeec7f3e09d5025bcec1876320fd49c
+        - 057bfe0ff816155817f79b7c49639b99
+      actions:
+      - service: notify.tele
+        data:
+          message: Некоторые сущности стали недоступны{{'\n'}} {{entities}}

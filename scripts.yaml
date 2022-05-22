@@ -1,0 +1,76 @@
+'1652523701871':
+  alias: Все ушли. Отключение всех автоматизаций
+  sequence:
+  - service: light.turn_off
+    data: {}
+    target:
+      entity_id: light.ves_svet
+  - service: automation.turn_off
+    data: {}
+    target:
+      entity_id:
+      - automation.on_nochnik_detiam
+      - automation.on_podsvetka_prikhozhei
+      - automation.avtomatizatsiia_prikhozhei
+      - automation.avtomatizatsiia_tualeta
+      - automation.vkliuchit_vannu_i_tualet_v_8_utra
+      - automation.otkliuchit_na_noch_avtomatizatsiiu_vanny_i_tualeta
+      - automation.vkliuchenie_sveta_po_sensoru
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 20
+      milliseconds: 0
+  - service: notify.tele
+    data:
+      message: 'Семья покинула дом. Отключаю свет и автоматизацию.{{''\n''}} 💡Состояние
+        света: *{{states.light.ves_svet.state}}*'
+  mode: single
+  icon: mdi:alarm-light-off
+'1652523785333':
+  alias: Кто-то дома. Включить автоматизации
+  sequence:
+  - if:
+    - condition: state
+      entity_id: sensor.sun_down
+      state: 'True'
+    then:
+    - type: turn_on
+      device_id: b90b42509d478a173e4b45762f906060
+      entity_id: light.prikhozhaia_podsvetka_l1
+      domain: light
+  - service: automation.turn_on
+    data: {}
+    target:
+      entity_id:
+      - automation.on_nochnik_detiam
+      - automation.on_podsvetka_prikhozhei
+      - automation.avtomatizatsiia_prikhozhei
+      - automation.avtomatizatsiia_tualeta
+      - automation.vkliuchit_vannu_i_tualet_v_8_utra
+      - automation.otkliuchit_na_noch_avtomatizatsiiu_vanny_i_tualeta
+      - automation.vkliuchenie_sveta_po_sensoru
+  - service: notify.tele
+    data:
+      message: 'Семья дома. Включаю автоматизацию{{''\n''}}👧Даша: *{{is_state(''device_tracker.telefon_dashi_5ggts'',
+        ''home'')}}*{{''\n''}}👨Артем: *{{is_state(''device_tracker.telefon_artem'',
+        ''home'')}}*'
+  mode: single
+  icon: mdi:home-account
+'1652525192671':
+  alias: Утренняя сводка новостей
+  sequence:
+  - service: notify.tele
+    data:
+      title: Информация о системах
+      message: '⏲️По состоянию на - *{{states.sensor.time.state}}*{{''\n''}} Uptime
+        HA: *{{states.ha_uptime.state}}*{{''\n''}} 🌡️Температура зал: *{{states.sensor.temperatura_zal_temperature.state}}
+        °C*{{''\n''}} 💧Влажность зал: *{{states.sensor.temperatura_zal_humidity.state}}
+        %*{{''\n''}} 🎈Давление: *{{((states.sensor.temperatura_zal_pressure.state
+        | float) * 0.0009869) | round(2) }} атм*{{''\n''}} ---------------На улице---------------{{''\n''}}
+        🌡️Температура: *{{states.sensor.yandex_weather_temperature.state}} °C*{{''\n''}}
+        🌡️Температура по ощущениям: *{{states.sensor.yandex_weather_feels_like_temperature.state}}
+        °C*{{''\n''}} 🪁Ветер: *{{states.sensor.wind_direction_sensor.state}}*{{''\n''}}
+        💨Скорость ветра: *{{states.sensor.yandex_weather_wind_speed.state}} м/с*{{''\n''}}'
+  mode: single
+  icon: mdi:newspaper

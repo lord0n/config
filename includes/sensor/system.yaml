@@ -1,0 +1,84 @@
+  - platform: time_date
+    display_options:
+      - 'time'
+      - 'date'
+      - 'time_date'
+
+  - platform: systemmonitor
+    resources:
+    - type: processor_use
+    - type: disk_use_percent
+      arg: /
+    - type: memory_use_percent
+    - type: last_boot
+    - type: disk_free
+      arg: /
+      
+  - platform: uptime
+    name: Uptime
+        
+  - platform: template
+    sensors:
+      ha_uptime:
+         friendly_name: "Home Assistant в онлайне -"
+         value_template: >
+          {% set up_time =  as_timestamp(now()) - as_timestamp(states('sensor.online')) %}
+
+          {% if up_time == 0 %}
+            Just restarted...
+          {% else %}
+            {% set minutes = (up_time // 60) | int %}
+            {% set hours = (minutes // 60) %}
+            {% set days = (hours // 24) %}
+            {% set weeks = (days // 7) %}
+
+            {% set minutes = (minutes % 60) %}
+            {% set hours =  (hours % 24) %}
+            {% set days = (days % 7) %}
+
+            {% macro phrase(value, name) %}
+                    {%- set value = value %}
+                    {%- set end = 's' if value > 1 else '' %}
+                    {{- '{} {}{}'.format(value, name, end) if value | int > 0 else '' }}
+            {%- endmacro %}
+
+            {% set text = [ phrase(weeks, 'week'), phrase(days, 'day'), phrase(hours, 'hr'), phrase(minutes, 'min') ] | select('!=','') | list | join(', ') %}
+            {% set last_comma = text.rfind(',') %}
+            {% if last_comma != -1 %}
+              {% set text = text[:last_comma] + ' and' + text[last_comma + 1:] %}
+            {% endif %}
+
+          {{ text }}
+
+          {% endif %}
+         icon_template: mdi:clock
+             
+# Время с последней перезагрузки
+      last_boot_custom:
+        friendly_name: "Сервер в онлайне -"
+        value_template: >
+           {% set uptime = as_timestamp (now()) -as_timestamp(states('sensor.last_boot')) | int %}
+           {% set minutes = (( uptime % 3600) / 60) | int %}
+           {% set hours = ((uptime % 86400) / 3600) | int %}
+           {% set days = (uptime / 86400) | int %}
+
+             {% if uptime < 1 %}
+               Меньше минуты
+             {% else %}
+               {% if days > 0 %}
+                 {{ days }} д.
+               {% endif %}
+               {% if hours > 0 %}
+                 {% if days > 0 %}
+                   {{ ' ' }}
+                 {% endif %}
+                 {{ hours }} ч.
+               {% endif %}
+               {% if minutes > 0 %}
+                 {% if days > 0 or hours > 0 %}
+                   {{ ' ' }}
+                 {% endif %}
+                   {{ minutes }} мин.
+               {% endif %}
+             {% endif %}
+        icon_template: mdi:clock

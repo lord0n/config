@@ -1,0 +1,38 @@
+
+# Loads default set of integrations. Do not remove.
+default_config:
+
+# Text to speech
+tts:
+  - platform: google_translate
+
+automation: !include automations.yaml
+script: !include scripts.yaml
+scene: !include scenes.yaml
+recorder: !include includes/recorder.yaml
+#Вынос во внешние папки
+sensor: !include_dir_merge_list includes/sensor
+binary_sensor: !include_dir_merge_list includes/bin_sensor
+
+telegram_bot:
+  - platform: polling
+    api_key: !secret api_key_bot
+    parse_mode: markdown
+    allowed_chat_ids:
+      - !secret chat_id_artem
+#      - !secret chat_id_olha
+#      - !secret chat_id_group
+#      - !secret chat_id_group_tech
+
+
+notify:
+  - name: tele
+    platform: telegram
+    chat_id: !secret chat_id_artem
+    
+device_tracker:
+  - platform: bluetooth_tracker
+    request_rssi: true
+    interval_seconds: 30
+    new_device_defaults:
+      track_new_devices: true

@@ -1,0 +1,19 @@
+  db_url: mysql://ha:ha@core-mariadb/ha?charset=utf8
+  include:
+    domains:
+      - switch
+      - light
+      - sensor
+      - weather
+      - sun
+    entities: 
+#Объем БД
+      - sensor.maria_db_size
+#Сенсоры температуры и влажности
+      - sensor.temperatura_vanna_temperature
+      - sensor.temperatura_zal_temperature
+      - sensor.temperatura_vanna_humidity
+      - sensor.temperatura_zal_humidity
+# Сенсоры мощности
+      - sensor.nochnik_detskaia_power
+      - sensor.prikhozhaia_podsvetka_power

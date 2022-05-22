@@ -1,0 +1,93 @@
+blueprint:
+  name: Aqara Magic Cube (Z2M) (простой вариант на 8 действия)
+  description: Управляйте чем угодно с помощью Aqara Magic Cube (Z 2M) - V1.2
+  domain: automation
+  input:
+    remote:
+      name: Remote
+      description: Магический куб для использования
+      selector:
+        entity:
+          integration: mqtt
+          domain: sensor
+          multiple: false
+    slide:
+      name: Сдвиньте куб
+      default: []
+      selector:
+        action: {}
+    tap:
+      name: Дважды коснитесь куба (постучите)
+      default: []
+      selector:
+        action: {}
+    flip90:
+      name: Переверните куб на 90 градусов (следующая грань)
+      default: []
+      selector:
+        action: {}
+    flip180:
+      name: Переверните куб на 180 градусов (через грань)
+      default: []
+      selector:
+        action: {}
+    rotate_right:
+      name: Поверните куб по часовой стрелке (вправо)
+      default: []
+      selector:
+        action: {}
+    rotate_left:
+      name: Поверните куб против часовой стрелки (влево)
+      default: []
+      selector:
+        action: {}
+    shake:
+      name: Встряхните кубик
+      default: []
+      selector:
+        action: {}
+    fall:
+      name: Бросьте кубик
+      default: []
+      selector:
+        action: {}
+  source_url: https://community.home-assistant.io/t/z2m-xiaomi-cube-controller/263006
+mode: queued
+max: 5
+max_exceeded: silent
+trigger:
+- platform: state
+  entity_id: !input 'remote'
+condition:
+- condition: and
+  conditions:
+  - condition: template
+    value_template: '{{ trigger.from_state.state != trigger.to_state.state
+      }} '
+  - condition: template
+    value_template: '{{ trigger.from_state.state in (''rotate_right'', ''rotate_left'',
+      ''flip90'', ''flip180'', ''slide'', ''tap'', ''shake'', ''fall'') }}'
+action:
+- variables:
+    event: '{{ trigger.from_state.state }}'
+- service: system_log.write
+  data:
+    level: info
+    message: 'Blueprint Script: {{ event }} {{ sub_event }}'
+- choose:
+  - conditions: '{{ event == "slide" }}'
+    sequence: !input 'slide'
+  - conditions: '{{ event == "tap" }}'
+    sequence: !input 'tap'
+  - conditions: '{{ event == "flip90" }}'
+    sequence: !input 'flip90'
+  - conditions: '{{ event == "flip180" }}'
+    sequence: !input 'flip180'
+  - conditions: '{{ event == "rotate_right" }}'
+    sequence: !input 'rotate_right'
+  - conditions: '{{ event == "rotate_left" }}'
+    sequence: !input 'rotate_left'
+  - conditions: '{{ event == "shake" }}'
+    sequence: !input 'shake'
+  - conditions: '{{ event == "fall" }}'
+    sequence: !input 'fall'

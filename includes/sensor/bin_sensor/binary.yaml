@@ -1,0 +1,14 @@
+template:
+  - binary_sensor:
+     name: "Ванна - движение и влажность > 60"
+     device_class: "motion"
+     state: >
+        {{ ( states('sensor.temperatura_vanna_humidity') | float > 60 ) or 
+        is_state('binary_sensor.dvizhenie_vannaia_occupancy', 'on') }}
+
+binary_sensor:
+  - platform: template
+    sensors:
+      sun_up:
+        friendly_name: "Sun is up"
+        value_template: true

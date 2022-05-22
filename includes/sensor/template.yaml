@@ -1,0 +1,37 @@
+ - platform: template
+   sensors:
+     shower_occupancy:
+       friendly_name: "Ванна влажность > 60"
+       value_template: >-
+         {{ ( states('sensor.temperatura_vanna_humidity') | float (40) > 60 ) }}
+
+ - platform: template
+   sensors:
+     vanna_motion_humidity60:
+       friendly_name: "Ванна - движение и влажность > 60"
+       value_template: >-
+         {{ ( states('sensor.temperatura_vanna_humidity') | float(40) > 60 ) or 
+         is_state('binary_sensor.dvizhenie_vannaia_occupancy', 'on') }}
+
+ - platform: template
+   sensors:
+     all_in_home:
+       friendly_name: "True - если к кинетику подключены телефоны Артема и Даши. False - если все отключены"
+       value_template: >-
+         {{ is_state('device_tracker.telefon_artem', 'home') 
+             or is_state('device_tracker.telefon_dashi_5ggts', 'home') }}
+             
+ - platform: template
+   sensors:
+     sun_down:
+       friendly_name: "Солнце зашло за горизонт"
+       value_template: >-
+         {{ is_state('sun.sun', 'below_horizon') }}
+
+ - platform: template
+   sensors:
+      wind_direction_sensor:
+        value_template: >
+          {% set winbearing = (states('sensor.sensor.yandex_weather_wind_bearing')|float(0)/45)|int|round +1 %}
+          {% set winddir = ['Северный', 'Северо-восточный','Восточный','Юго-восточный','Южный','Юго-западный','Западный','Северо-западный']%}
+          {{ winddir[winbearing]}}

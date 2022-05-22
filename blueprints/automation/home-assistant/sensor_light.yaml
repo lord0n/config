@@ -1,0 +1,50 @@
+blueprint:
+  name: Включение света по сенсору
+  description: Включение света по сенсору
+  domain: automation
+  input:
+    motion_entity:
+      name: Motion Sensor
+      selector:
+        entity:
+          domain: sensor
+          multiple: false
+    light_target:
+      name: Light
+      selector:
+        target:
+          entity:
+            domain: light
+    no_motion_wait:
+      name: Wait time
+      description: Time to leave the light on after last motion is detected.
+      default: 120
+      selector:
+        number:
+          min: 0.0
+          max: 3600.0
+          unit_of_measurement: seconds
+          mode: slider
+          step: 1.0
+mode: restart
+max_exceeded: silent
+trigger:
+  platform: state
+  entity_id: !input 'motion_entity'
+  from: 'False'
+  to: 'True'
+action:
+- alias: Включить свет
+  service: light.turn_on
+  target: !input 'light_target'
+- alias: Ожидание переключения сенсора в False
+  wait_for_trigger:
+    platform: state
+    entity_id: !input 'motion_entity'
+    from: 'True'
+    to: 'False'
+- alias: Количество секунд для ожидания
+  delay: !input 'no_motion_wait'
+- alias: Выключение света
+  service: light.turn_off
+  target: !input 'light_target'
